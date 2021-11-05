@@ -44,7 +44,8 @@ bonanza_hares_data <- read_csv(here("data","bonanza_hares.csv")) %>%
 . Count the total number of juvenile hare trappings during each year of the study, and create a finalized data visualization of the counts by year. Include a figure caption below the figure in your report. 
 
 ```{r}
-annual_juvenile_trap_counts <- bonanza_hares_data %>% 
+annual_juvenile_trap_counts <- bonanza_hares_data %>%
+  filter(age == "j") %>% 
   mutate(year = year(date)) %>% 
   group_by(year) %>% 
   summarize(trap_counts = n())
@@ -59,16 +60,16 @@ ggplot(data = annual_juvenile_trap_counts, aes(x = year, y = trap_counts))+
   theme_classic()+
   theme(plot.caption = element_text(hjust = 0.5, size = 8),
         plot.title = element_text(hjust = 0.5))+
-  scale_x_continuous(breaks = c(1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012))
+  scale_x_continuous(breaks = c(1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012))
 
 
 ```
 
 ### Figure 1 takeaways
 
-There is no clear general trend displayed in figure 1, there is a large spread of annual juvenile hare trap counts, ranging from 38 to 410. The mean count of juvenile hares trapped annually is 213 and median is 179. The changes from year to year are stark and show no general trend, this could be due to the fact that these are absolute counts and are impacted by the effort of researchers. I would suggest standardizing the juvenile hare population by randomly selecting uniform sample sizes for each year. 
+There is a general trend of decreasing counts of juvenile hare trappings from 1998-2012, there is a large spread of annual juvenile hare trap counts, ranging from 2 to 126. The mean count of juvenile hares trapped annually is 31.5 and median is 18.5. The changes from year to year show no consistent trend, this could be due to the fact that these are absolute counts and are impacted by the effort of researchers. I would suggest standardizing the juvenile hare population by randomly selecting uniform sample sizes for each year. 
 
-```{r, include=FALSE}
+```{r}
 annual_counts_summary <- annual_juvenile_trap_counts %>% 
   summarize(mean = mean(trap_counts),
             median = median(trap_counts),
@@ -82,18 +83,28 @@ annual_counts_summary <- annual_juvenile_trap_counts %>%
   kable_minimal()
   
 annual_counts_summary
+
 ```
 
 ## Visualize juvenile hare weights
 
 ```{r}
 juvenile_weights_sex_site <- bonanza_hares_data %>% 
-  group_by(grid)
+  filter(age == "j") %>% 
+  select(sex, weight, grid) %>% 
+  mutate(sex = case_when(
+    sex == "m" ~ "M",
+    sex == "f" ~ "F")) %>% 
+  mutate(grid_full = case_when(
+    grid == "bonbs" ~ "Bonbs",
+    grid == "bonmat" ~ "Bonanza Mature",
+    grid == "bonrip" ~ "Bonanza Riparian"
+  ))
 
-ggplot(data = bonanza_hares_data, aes(x = weight))+
+ggplot(data = juvenile_weights_sex_site, aes(x = weight))+
   geom_histogram()+
   aes(fill = sex)+
-  facet_grid(grid ~ sex)+
+  facet_grid(grid_full ~ sex)+
   labs(title = "Juvenile hare weights by sex and site",
        x = "Weight (g)",
        y = "Count",
@@ -106,9 +117,11 @@ ggplot(data = bonanza_hares_data, aes(x = weight))+
 
 
 ```
+
+
 ### Figure 2 takeaways
 
-
+There is a correlation between the count of juvenile hare weight and site. The Bonanza Riparian site has the largest counts of weights for both male and female juvenile hares, and the Bonbs site has the fewest counts of weights for males, females and NA. The distribution of weights of juvenile hares between sites and sexes have no clear differences, the biggest take away is the differences in counts and how that is impacting the lack of visible trends. 
 ## Relationship between juvenile weight & hind foot length
 
 ```{r}
