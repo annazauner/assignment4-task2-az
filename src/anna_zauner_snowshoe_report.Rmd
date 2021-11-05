@@ -64,19 +64,44 @@ ggplot(data = annual_juvenile_trap_counts, aes(x = year, y = trap_counts))+
 
 ```
 
-```{r}
+### Figure 1 takeaways
 
+There is no clear general trend displayed in figure 1, there is a large spread of annual juvenile hare trap counts, ranging from 38 to 410. The mean count of juvenile hares trapped annually is 213 and median is 179. The changes from year to year are stark and show no general trend, this could be due to the fact that these are absolute counts and are impacted by the effort of researchers. I would suggest standardizing the juvenile hare population by randomly selecting uniform sample sizes for each year. 
 
-
-
+```{r, include=FALSE}
+annual_counts_summary <- annual_juvenile_trap_counts %>% 
+  summarize(mean = mean(trap_counts),
+            median = median(trap_counts),
+            minimum = min(trap_counts),
+            maximum = max(trap_counts)) %>% 
+  kable(caption = "Table 1: Summary statistics of annual juvenile hare trap counts",
+        col.names = c("Mean",
+                      "Median",
+                      "Minimun",
+                      "Maximum")) %>% 
+  kable_minimal()
+  
+annual_counts_summary
+```
 
 ## Visualize juvenile hare weights
 
 ```{r}
+juvenile_weights_sex_site <- bonanza_hares_data %>% 
+  group_by(grid)
 
-## Juvenile weight comparison (male & female snowshoe hares)
+ggplot(data = bonanza_hares_data, aes(x = weight))+
+  geom_histogram(color = "steelblue", fill = "white")+
+  facet_grid(grid ~ sex)+
+  labs(title = "Juvenile hare weights by sex and site",
+       x = "Weight (g)",
+       y = "Count",
+       caption = "Figure 2: Juvenile hare weights in grams recorded by sex (male, female or NA) and site recorded (Bonbs, Bonmat or Bonrip)")+
+  theme(plot.title = element_text(hjust = 0.5),
+        plot.caption = element_text(hjust = 0.5),
+        )
+  
 
-```{r}
 
 ```
 
