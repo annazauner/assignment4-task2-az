@@ -41,15 +41,38 @@ bonanza_hares_data <- read_csv(here("data","bonanza_hares.csv")) %>%
 
 ## Annual juvenile hare trap counts
 
+. Count the total number of juvenile hare trappings during each year of the study, and create a finalized data visualization of the counts by year. Include a figure caption below the figure in your report. 
+
 ```{r}
+annual_juvenile_trap_counts <- bonanza_hares_data %>% 
+  mutate(year = year(date)) %>% 
+  group_by(year) %>% 
+  summarize(trap_counts = n())
+
+
+ggplot(data = annual_juvenile_trap_counts, aes(x = year, y = trap_counts))+
+  geom_bar(stat = "identity", fill = "blue")+
+  labs(x = "Year",
+       y = "Juvenile hare trap counts",
+       title = "Annual juvenile hare trap counts (1998-2012)",
+       caption = "Figure 1: Counts of juvenile hare trappings during each year of the study from 1998 to 2012")+
+  theme_classic()+
+  theme(plot.caption = element_text(hjust = 0.5, size = 8),
+        plot.title = element_text(hjust = 0.5))+
+  scale_x_continuous(breaks = c(1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012))
+
 
 ```
+
+```{r}
+
+
+
+
 
 ## Visualize juvenile hare weights
 
 ```{r}
-
-```
 
 ## Juvenile weight comparison (male & female snowshoe hares)
 
