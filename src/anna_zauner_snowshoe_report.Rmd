@@ -122,6 +122,14 @@ ggplot(data = juvenile_weights_sex_site, aes(x = weight))+
 ### Figure 2 takeaways
 
 There is a correlation between the count of juvenile hare weight and site. The Bonanza Riparian site has the largest counts of weights for both male and female juvenile hares, and the Bonbs site has the fewest counts of weights for males, females and NA. The distribution of weights of juvenile hares between sites and sexes have no clear differences, the biggest take away is the differences in counts and how that is impacting the lack of visible trends. 
+
+## Juvenile weight comparison (male & female snowshoe hares)
+
+```{r}
+
+```
+
+
 ## Relationship between juvenile weight & hind foot length
 
 ```{r}
