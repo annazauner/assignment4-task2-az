@@ -91,12 +91,14 @@ juvenile_weights_sex_site <- bonanza_hares_data %>%
   group_by(grid)
 
 ggplot(data = bonanza_hares_data, aes(x = weight))+
-  geom_histogram(color = "steelblue", fill = "white")+
+  geom_histogram()+
+  aes(fill = sex)+
   facet_grid(grid ~ sex)+
   labs(title = "Juvenile hare weights by sex and site",
        x = "Weight (g)",
        y = "Count",
-       caption = "Figure 2: Juvenile hare weights in grams recorded by sex (male, female or NA) and site recorded (Bonbs, Bonmat or Bonrip)")+
+       caption = "Figure 2: Juvenile hare weights in grams recorded by sex (male, female or NA) and site recorded (Bonbs, Bonmat or Bonrip)",
+       fill = "Sex")+
   theme(plot.title = element_text(hjust = 0.5),
         plot.caption = element_text(hjust = 0.5),
         )
@@ -104,6 +106,8 @@ ggplot(data = bonanza_hares_data, aes(x = weight))+
 
 
 ```
+### Figure 2 takeaways
+
 
 ## Relationship between juvenile weight & hind foot length
 
