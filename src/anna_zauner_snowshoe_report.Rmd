@@ -115,7 +115,16 @@ ggplot(data = juvenile_weights_sex_site, aes(x = weight))+
   theme(plot.title = element_text(hjust = 0.5),
         plot.caption = element_text(hjust = 0.5),
         )
-  
+
+
+```
+
+
+### Figure 2 takeaways
+
+There is a correlation between the count of juvenile hare weight and site. The Bonanza Riparian site has the largest counts of weights for both male and female juvenile hares, and the Bonbs site has the fewest counts of weights for males, females and NA. The distribution of weights of juvenile hares between sites and sexes have no clear differences, the biggest take away is the differences in counts and how that is impacting the lack of visible trends.
+
+```{r}
 # Summary statistics
 
 juvenile_weights_sex_site_summary <- juvenile_weights_sex_site %>% 
@@ -141,14 +150,14 @@ juvenile_weights_sex_site_summary
 
 ```
 
+### Table 2 takeaways 
 
-### Figure 2 takeaways
-
-There is a correlation between the count of juvenile hare weight and site. The Bonanza Riparian site has the largest counts of weights for both male and female juvenile hares, and the Bonbs site has the fewest counts of weights for males, females and NA. The distribution of weights of juvenile hares between sites and sexes have no clear differences, the biggest take away is the differences in counts and how that is impacting the lack of visible trends. 
+The summary statistics of juvenile hare weights by site and sex indicate a large differences in sample sizes betweeen each site. Mean female weights tend to be lower than male weights between all sites. Overall there is a high variation in weights between males and females. 
 
 ## Juvenile weight comparison (male & female snowshoe hares)
 
 ```{r}
+# Wrangle the data 
 juvenile_m_f_weight <- bonanza_hares_data %>%
   filter(age == "j", 
          sex %in% c("m", "f")) %>% 
@@ -156,8 +165,8 @@ juvenile_m_f_weight <- bonanza_hares_data %>%
  
 juvenile_m_f_weight_summery <- juvenile_m_f_weight %>% 
   group_by(sex) %>% 
-  summarize(mean = mean(weight),
-            sd = sd(weight),
+  summarize(mean = mean(weight, na.rm = TRUE),
+            sd = sd(weight, na.rm = TRUE),
             sample_size = n()) %>% 
   kable(caption = "Table 1: Summary statistics of juvenile weights between male and femal snowshoe hares",
         col.names = c("Sex",
