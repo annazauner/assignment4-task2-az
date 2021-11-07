@@ -126,6 +126,20 @@ There is a correlation between the count of juvenile hare weight and site. The B
 ## Juvenile weight comparison (male & female snowshoe hares)
 
 ```{r}
+juvenile_m_f_weight <- annual_juvenile_trap_counts %>%
+  
+  summarize(mean = mean(trap_counts),
+            median = median(trap_counts),
+            minimum = min(trap_counts),
+            maximum = max(trap_counts)) %>% 
+  kable(caption = "Table 1: Summary statistics of annual juvenile hare trap counts",
+        col.names = c("Mean",
+                      "Median",
+                      "Minimun",
+                      "Maximum")) %>% 
+  kable_minimal()
+  
+annual_counts_summary
 
 ```
 
