@@ -4,8 +4,8 @@ author: "Anna Zauner"
 date: "11/4/2021"
 output: 
   html_document: 
-    theme: simplex
-    number_sections: yes
+    theme: cerulean
+    toc: yes
 ---
 # Introduction 
 
@@ -23,6 +23,7 @@ library(janitor)
 library(here)
 library(lubridate)
 library(kableExtra)
+library(effsize)
 ```
 
 ## Read in the data
@@ -39,7 +40,7 @@ bonanza_hares_data <- read_csv(here("data","bonanza_hares.csv")) %>%
  
 # Juvenile hare initial investigation 
 
-## Annual juvenile hare trap counts
+## Section 1: Annual juvenile hare trap counts
 
 . Count the total number of juvenile hare trappings during each year of the study, and create a finalized data visualization of the counts by year. Include a figure caption below the figure in your report. 
 
@@ -58,8 +59,8 @@ ggplot(data = annual_juvenile_trap_counts, aes(x = year, y = trap_counts))+
        title = "Annual juvenile hare trap counts (1998-2012)",
        caption = "Figure 1: Counts of juvenile hare trappings during each year of the study from 1998 to 2012")+
   theme_classic()+
-  theme(plot.caption = element_text(hjust = 0.5, size = 8),
-        plot.title = element_text(hjust = 0.5))+
+  theme(plot.caption = element_text(hjust = 0.5, size = 8, face = "bold"),
+        plot.title = element_text(hjust = 0.5, face = "bold"))+
   scale_x_continuous(breaks = c(1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012))
 
 
@@ -86,7 +87,7 @@ annual_counts_summary
 
 ```
 
-## Visualize juvenile hare weights
+## Section 2: Visualize juvenile hare weights
 
 ```{r}
 # Wrangle the data 
@@ -110,10 +111,10 @@ ggplot(data = juvenile_weights_sex_site, aes(x = weight))+
   labs(title = "Juvenile hare weights by sex and site",
        x = "Weight (g)",
        y = "Count",
-       caption = "Figure 2: Juvenile hare weights in grams recorded by sex (male, female or NA) and site recorded (Bonbs, Bonmat or Bonrip)",
+       caption = "Figure 2: Juvenile hare weights in grams recorded by sex and site recorded.",
        fill = "Sex")+
-  theme(plot.title = element_text(hjust = 0.5),
-        plot.caption = element_text(hjust = 0.5),
+  theme(plot.title = element_text(hjust = 0.5, face = "bold"),
+        plot.caption = element_text(hjust = 0.5, face = "bold"),
         )
 
 
@@ -135,7 +136,7 @@ juvenile_weights_sex_site_summary <- juvenile_weights_sex_site %>%
             min = min(weight, na.rm = TRUE),
             max = max(weight, na.rm = TRUE),
             sd = sd(weight, na.rm = TRUE)) %>% 
-  kbl(caption = "Table 2: Summary statistics for male and female juvenile hare weights (g)",
+  kbl(caption = "Table 2: Summary statistics for male, female and NA juvenile hare weights (g)",
       col.names = c("Site",
                     "Sex",
                     "Sample size",
@@ -144,8 +145,9 @@ juvenile_weights_sex_site_summary <- juvenile_weights_sex_site %>%
                     "Min (g)",
                     "Max (g)",
                     "Standard deviation (g)")) %>% 
-  kable_minimal()
-
+  kable_minimal(html_font = "Georgia", font_size = 12, full_width = FALSE) %>% 
+  kable_material(c("striped", "hover", "condensed"))
+  
 juvenile_weights_sex_site_summary
 
 ```
@@ -154,31 +156,43 @@ juvenile_weights_sex_site_summary
 
 The summary statistics of juvenile hare weights by site and sex indicate a large differences in sample sizes betweeen each site. Mean female weights tend to be lower than male weights between all sites. Overall there is a high variation in weights between males and females. 
 
-## Juvenile weight comparison (male & female snowshoe hares)
+## Section 3: Juvenile weight comparison (male & female snowshoe hares)
 
 ```{r}
 # Wrangle the data 
 juvenile_m_f_weight <- bonanza_hares_data %>%
   filter(age == "j", 
          sex %in% c("m", "f")) %>% 
-  select(sex, weight)
+  select(sex, weight) %>% 
+    mutate(sex = case_when(
+    sex == "m" ~ "Male",
+    sex == "f" ~ "Female"))
  
-juvenile_m_f_weight_summery <- juvenile_m_f_weight %>% 
+# Table 
+
+juvenile_m_f_weight_summary <- juvenile_m_f_weight %>% 
   group_by(sex) %>% 
   summarize(mean = mean(weight, na.rm = TRUE),
+            median = median(weight, na.rm = TRUE),
             sd = sd(weight, na.rm = TRUE),
             sample_size = n()) %>% 
-  kable(caption = "Table 1: Summary statistics of juvenile weights between male and femal snowshoe hares",
+  kable(caption = "Table 3: Summary statistics of juvenile weights (g) between male and femal snowshoe hares",
         col.names = c("Sex",
-                      "Mean",
-                      "Standard deviation",
-                      "Sample size")) %>% 
-  kable_minimal()
+                      "Mean (g)",
+                      "Median (g)",
+                      "Standard deviation (g)",
+                      "Sample size"),
+        digits = 1) %>% 
+  kable_minimal(html_font = "Georgia", font_size = 12, full_width = FALSE) %>% 
+  kable_material(c("striped", "hover", "condensed"))
   
-juvenile_m_f_weight
+juvenile_m_f_weight_summary
 ```
 
 ```{r, include=FALSE}
+
+# Exploratory graphs 
+
 ggplot(data =juvenile_m_f_weight, aes(x = weight))+
   geom_histogram()+
   facet_wrap(~sex)
@@ -186,32 +200,83 @@ ggplot(data =juvenile_m_f_weight, aes(x = weight))+
 ggplot(data =juvenile_m_f_weight, aes(sample = weight))+
   geom_qq()+
   facet_wrap(~sex)
-         
+ 
+# Sample size in combination with histograms & QQ plots: I feel OK about using a t-test for a means comparison.         
 ```
 
 
 ```{r}
 
-# two sample t-test set up
+# Two sample t-test and Cohen test set up
 
 male_sample <- juvenile_m_f_weight %>% 
-  filter(sex == "m") %>% 
+  filter(sex == "Male") %>% 
+  drop_na(weight) %>% 
   pull(weight)
+
 
 female_sample <- juvenile_m_f_weight %>% 
-  filter(sex == "f") %>% 
+  filter(sex == "Female") %>% 
+  drop_na(weight) %>% 
   pull(weight)
+  
 
-# two sample t-test
+
+# Two sample t-test
 m_f_weight_t <- t.test(male_sample,female_sample)
 
-m_f_weight_t
+m_f_weight_t # p = 0.7%
+
+# Cohen test
+
+m_f_weiht_cohen <- cohen.d(male_sample, female_sample)
+
+m_f_weiht_cohen
 ```
 
-## Relationship between juvenile weight & hind foot length
+### Table 3 takeaways
+
+The difference in mean weight between male and female juvenile hares is 90.5 (g), and the results of the t-test have a p-value of `r m_f_weight_t$p.value` meaning that if these samples were drawn from populations with the same mean, the probability of taking two random samples with means at least as different as the sample means we found by random chance (taking into account Cohen's d = 0.29 and n = 363) is a 0.7%. Therefore we can reject the null hypothesis that the samples were drawn from populations with the same mean.
+
+## Section 4: Relationship between juvenile weight & hind foot length
 
 ```{r}
+# Wrangle the data
 
+juvenile_hfoot <- bonanza_hares_data %>% 
+  filter(age == "j") %>% 
+  select(weight, hindft)
+
+# Data visualization
+
+ggplot(data = juvenile_hfoot, aes(x = hindft, y = weight))+
+  geom_jitter()+
+  geom_smooth(method = "lm")+
+  labs(x = "Hindfoot length (mm)",
+       y = "Weight (g)",
+       title = "Juvenile hare weight and hindfoot length",
+       caption = "Figure 3: Juvenile hare weight (g) and hindfoot length (mm) comparison with regression line")+
+  theme(plot.title = element_text(hjust = 0.5, face = "bold"),
+        plot.caption = element_text(hjust = 0.5, face = "bold"))
+```
+```{r}
+# Linear model stored as juvenile_lm 
+juvenile_lm <- lm(weight ~ hindft, data = juvenile_hfoot)
+
+# Return complere overview
+
+summary(juvenile_lm)
+
+# Use broom::tidy() function to see the model outputs in a nice format
+
+juvenile_lm_tidy <- broom::tidy(juvenile_lm)
+
+juvenile_lm_tidy_out <- broom::glance(juvenile_lm_tidy)
+juvenile_lm_tidy_out
+
+# Find Pearson's r value which indicated the strength of the correlation between hindfoot length and weight. 
+
+juvenile_cor <- cor.test(juvenile_hfoot$weight, juvenile_hfoot$hindft)
 ```
 
 # Summary 
