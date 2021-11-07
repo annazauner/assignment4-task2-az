@@ -89,6 +89,7 @@ annual_counts_summary
 ## Visualize juvenile hare weights
 
 ```{r}
+# Wrangle the data 
 juvenile_weights_sex_site <- bonanza_hares_data %>% 
   filter(age == "j") %>% 
   select(sex, weight, grid) %>% 
@@ -101,6 +102,7 @@ juvenile_weights_sex_site <- bonanza_hares_data %>%
     grid == "bonrip" ~ "Bonanza Riparian"
   ))
 
+# Histogram visualization 
 ggplot(data = juvenile_weights_sex_site, aes(x = weight))+
   geom_histogram()+
   aes(fill = sex)+
@@ -114,7 +116,28 @@ ggplot(data = juvenile_weights_sex_site, aes(x = weight))+
         plot.caption = element_text(hjust = 0.5),
         )
   
+# Summary statistics
 
+juvenile_weights_sex_site_summary <- juvenile_weights_sex_site %>% 
+  group_by(grid_full, sex) %>% 
+  summarize(sample_size = n(),
+            meadian = median(weight, na.rm = TRUE),
+            mean = mean(weight, na.rm = TRUE),
+            min = min(weight, na.rm = TRUE),
+            max = max(weight, na.rm = TRUE),
+            sd = sd(weight, na.rm = TRUE)) %>% 
+  kbl(caption = "Table 2: Summary statistics for male and female juvenile hare weights (g)",
+      col.names = c("Site",
+                    "Sex",
+                    "Sample size",
+                    "Median (g)",
+                    "Mean (g)",
+                    "Min (g)",
+                    "Max (g)",
+                    "Standard deviation (g)")) %>% 
+  kable_minimal()
+
+juvenile_weights_sex_site_summary
 
 ```
 
@@ -126,23 +149,55 @@ There is a correlation between the count of juvenile hare weight and site. The B
 ## Juvenile weight comparison (male & female snowshoe hares)
 
 ```{r}
-juvenile_m_f_weight <- annual_juvenile_trap_counts %>%
-  
-  summarize(mean = mean(trap_counts),
-            median = median(trap_counts),
-            minimum = min(trap_counts),
-            maximum = max(trap_counts)) %>% 
-  kable(caption = "Table 1: Summary statistics of annual juvenile hare trap counts",
-        col.names = c("Mean",
-                      "Median",
-                      "Minimun",
-                      "Maximum")) %>% 
+juvenile_m_f_weight <- bonanza_hares_data %>%
+  filter(age == "j", 
+         sex %in% c("m", "f")) %>% 
+  select(sex, weight)
+ 
+juvenile_m_f_weight_summery <- juvenile_m_f_weight %>% 
+  group_by(sex) %>% 
+  summarize(mean = mean(weight),
+            sd = sd(weight),
+            sample_size = n()) %>% 
+  kable(caption = "Table 1: Summary statistics of juvenile weights between male and femal snowshoe hares",
+        col.names = c("Sex",
+                      "Mean",
+                      "Standard deviation",
+                      "Sample size")) %>% 
   kable_minimal()
   
-annual_counts_summary
-
+juvenile_m_f_weight
 ```
 
+```{r, include=FALSE}
+ggplot(data =juvenile_m_f_weight, aes(x = weight))+
+  geom_histogram()+
+  facet_wrap(~sex)
+
+ggplot(data =juvenile_m_f_weight, aes(sample = weight))+
+  geom_qq()+
+  facet_wrap(~sex)
+         
+```
+
+
+```{r}
+
+# two sample t-test set up
+
+male_sample <- juvenile_m_f_weight %>% 
+  filter(sex == "m") %>% 
+  pull(weight)
+
+female_sample <- juvenile_m_f_weight %>% 
+  filter(sex == "f") %>% 
+  pull(weight)
+
+# two sample t-test
+m_f_weight_t <- t.test(male_sample,female_sample)
+
+m_f_weight_t
+```
 
 ## Relationship between juvenile weight & hind foot length
 
