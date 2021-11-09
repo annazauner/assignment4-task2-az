@@ -189,7 +189,7 @@ juvenile_m_f_weight_ref <- juvenile_m_f_weight %>%
             sd = sd(weight, na.rm = TRUE),
             sample_size = n())
 
-# Table 
+# Finalized table 
 
 juvenile_m_f_weight_summary <- juvenile_m_f_weight %>% 
   group_by(sex) %>% 
@@ -228,7 +228,7 @@ ggplot(data =juvenile_m_f_weight, aes(sample = weight))+ # qq plot
 
 ```{r}
 
-# Two sample t-test and Cohen test set up
+# Two sample t-test and Cohen test set up/ data wrangling
 
 male_sample <- juvenile_m_f_weight %>% 
   filter(sex == "Male") %>% 
@@ -246,13 +246,13 @@ female_sample <- juvenile_m_f_weight %>%
 # Two sample t-test
 m_f_weight_t <- t.test(male_sample,female_sample)
 
-m_f_weight_t # p = 0.7%
+#m_f_weight_t # p = 0.7%
 
 # Cohen test
 
 m_f_weight_cohen <- cohen.d(male_sample, female_sample)
 
-m_f_weight_cohen
+#m_f_weight_cohen
 ```
 
 ### Table 2 takeaways
@@ -305,8 +305,9 @@ juvenile_cor <- cor.test(juvenile_hfoot$weight, juvenile_hfoot$hindft)
 
 Exploratory data analysis reveals the following initial findings:
 
-- Annual trap counts peaked in the first year of the study and were consistently lower in subsequent years.
-- There were significant differences in sample sizes between sites when comparing weights by site and sex, which may have influenced the visible trends of males weighing more then females.
+- The inconsistencies in sample sizes between years and sites make it difficult to draw definitive conclusions about the data.
+
+- Given a small to moderate effect size and p value < 0.01, we can consider rejecting the null hypothesis that the means of 
 - 
 
 # Citations 
