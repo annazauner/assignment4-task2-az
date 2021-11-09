@@ -56,9 +56,7 @@ ggplot(data = annual_juvenile_trap_counts, aes(x = year, y = trap_counts))+
   geom_bar(stat = "identity", fill = "blue")+
   labs(x = "Year",
        y = "Juvenile hare trap counts",
-       title = "Annual juvenile hare trap counts (1999-2012) (ZAUNER)",
-       caption = "Figure 1: Counts of juvenile hare trappings during each year of the study from 1998 to 2012 in the
-       Bonanza Creek Experimental Forest. The trap counts peak in 1999 at 126 hares. ")+
+       title = "Annual juvenile hare trap counts (1999-2012) (ZAUNER)")+
   theme_classic()+
   theme(plot.caption = element_text(hjust = 0.5, size = 8, face = "bold"),
         plot.title = element_text(hjust = 0.5, face = "bold"))+
@@ -66,6 +64,7 @@ ggplot(data = annual_juvenile_trap_counts, aes(x = year, y = trap_counts))+
 
 
 ```
+**Figure 1:** Counts of juvenile hare trappings during each year of the study from 1998 to 2012 in the Bonanza Creek Experimental Forest. The trap counts peak in 1999 at 126 hares data from Kielland et al.(2017).
 
 ```{r}
 
@@ -114,7 +113,7 @@ ggplot(data = juvenile_weights_sex_site, aes(x = sex, y = weight)) +
   theme_minimal() +
   labs(x = "Sex",
        y = "Weight (g)",
-       title = "Juvenile hare weight (g) by sex and site (ZAUNER)") +
+       title = "Juvenile hare weight (g) by sex and site (ZAUNER)")+
   theme(plot.title = element_text(hjust = 0.5, face = "bold"),
         axis.title = element_text(face = "bold"),
         panel.border = element_rect(color = "black",
@@ -122,7 +121,20 @@ ggplot(data = juvenile_weights_sex_site, aes(x = sex, y = weight)) +
                                     size = 0.5))+
   facet_wrap(~grid_full)
 ```
+**Figure 2:** Juvenile hare weight observations (g) by sex (male, female and unknown) and site (Black Spruce, Mature and Riparian). Gold (female), teal (male) and coral (unknown) points indicate observations for weight (grams) of a juvenile hare. Black point indicates the mean value for each sex. Data: Kielland et al. (2017).
 
+```{r}
+# Under the hood statistics table to reference
+juvenile_weights_sex_site_ref <- juvenile_weights_sex_site %>% 
+  group_by(grid_full, sex) %>% 
+  summarize(sample_size = n(),
+            meadian = median(weight, na.rm = TRUE),
+            mean = mean(weight, na.rm = TRUE),
+            min = min(weight, na.rm = TRUE),
+            max = max(weight, na.rm = TRUE),
+            sd = sd(weight, na.rm = TRUE))
+
+```
 
 ```{r}
 # Summary statistics
@@ -131,11 +143,11 @@ juvenile_weights_sex_site_summary <- juvenile_weights_sex_site %>%
   group_by(grid_full, sex) %>% 
   summarize(sample_size = n(),
             meadian = median(weight, na.rm = TRUE),
-            mean = mean(weight, na.rm = TRUE),
+            mean = mean(weight, na.rm = TRUE, digits = 1),
             min = min(weight, na.rm = TRUE),
             max = max(weight, na.rm = TRUE),
             sd = sd(weight, na.rm = TRUE)) %>% 
-  kbl(caption = "Table 2: Summary statistics for male, female and NA juvenile hare weights (g)",
+  kbl(caption = "Table 1: Descriptive statistics (sample size, median, mean, minimum, maximum and standard deviation) for male, female and unknown juvenile hare weights (g). Data: Kielland et al. (2017)",
       col.names = c("Site",
                     "Sex",
                     "Sample size",
@@ -151,9 +163,9 @@ juvenile_weights_sex_site_summary
 
 ```
 
-### Visualizations for juvenile hare weights takeaways
+### Juvenile hare weights and descriptive statistics
 
-There is a visible difference in counts of juvenile hares that had weights recorded between sites. The Riparian site has the largest counts of weights for both male and female juvenile hares, and the Black Spruce site has the fewest counts of weights for males, females and unknown. The distribution of weights of juvenile hares between sites and sexes have no distinct trend, although the central tendency of female weights is below male weights at each site. The biggest take away is that the large differences in counts can impact the visible trends.
+There is a visible difference in sample sizes of juvenile hares between sites. The Riparian site has the largest sample size of weights for male (`r juvenile_weights_sex_site_ref$sample_size[8]`), female (`r juvenile_weights_sex_site_ref$sample_size[7]`) and unknown (`r juvenile_weights_sex_site_ref$sample_size[9]`) juvenile hares, and the Black Spruce site has the fewest counts of weights for males (`r juvenile_weights_sex_site_ref$sample_size[2]`), females (`r juvenile_weights_sex_site_ref$sample_size[1]`) and unknown `r juvenile_weights_sex_site_ref$sample_size[3]`. The central tendency (mean) of female weights is below male weights at each site although there is a large spread (standard deviation), for Riparian females (`r juvenile_weights_sex_site_ref$mean[7]` ± `r juvenile_weights_sex_site_ref$sd[7]`; mean ± 1 standard deviation) compared to males (`r juvenile_weights_sex_site_ref$mean[8]`± `r juvenile_weights_sex_site_ref$sd[8]`). The biggest take away is that the large differences in sample size (n) and large standard deviations which impact the visible trends.
 
 
 ## Section 3: Juvenile weight comparison (male & female snowshoe hares)
@@ -168,6 +180,15 @@ juvenile_m_f_weight <- bonanza_hares_data %>%
     sex == "m" ~ "Male",
     sex == "f" ~ "Female"))
  
+# Under the hood reference table
+
+juvenile_m_f_weight_ref <- juvenile_m_f_weight %>% 
+  group_by(sex) %>% 
+  summarize(mean = mean(weight, na.rm = TRUE),
+            median = median(weight, na.rm = TRUE),
+            sd = sd(weight, na.rm = TRUE),
+            sample_size = n())
+
 # Table 
 
 juvenile_m_f_weight_summary <- juvenile_m_f_weight %>% 
@@ -176,7 +197,7 @@ juvenile_m_f_weight_summary <- juvenile_m_f_weight %>%
             median = median(weight, na.rm = TRUE),
             sd = sd(weight, na.rm = TRUE),
             sample_size = n()) %>% 
-  kable(caption = "Table 3: Summary statistics of juvenile weights (g) between male and femal snowshoe hares",
+  kable(caption = "Table 2: Descriptive statistics (mean, median, standard deviation and sample size) of juvenile weights (g) for male and femal snowshoe hares",
         col.names = c("Sex",
                       "Mean (g)",
                       "Median (g)",
@@ -201,7 +222,7 @@ ggplot(data =juvenile_m_f_weight, aes(sample = weight))+ # qq plot
   geom_qq()+
   facet_wrap(~sex)
  
-# Sample size in combination with histograms & QQ plots: I feel OK about using a t-test for a means comparison.         
+# Sample size (363) in combination with histograms & QQ plots: I feel OK about using a t-test for a means comparison.         
 ```
 
 
@@ -229,18 +250,18 @@ m_f_weight_t # p = 0.7%
 
 # Cohen test
 
-m_f_weiht_cohen <- cohen.d(male_sample, female_sample)
+m_f_weight_cohen <- cohen.d(male_sample, female_sample)
 
-m_f_weiht_cohen
+m_f_weight_cohen
 ```
 
-### Table 3 takeaways
+### Table 2 takeaways
 
-The difference in mean weight between male and female juvenile hares is 90.5 (g), and the results of the t-test have a p-value of `r m_f_weight_t$p.value` meaning that if these samples were drawn from populations with the same mean, the probability of taking two random samples with means at least as different as the sample means we found by random chance (taking into account Cohen's d = 0.29 and n = 363) is a 0.7%. Therefore we can reject the null hypothesis that the samples were drawn from populations with the same mean.
+On average male juvenile hares weigh more than females (`r juvenile_m_f_weight_ref$mean[2]` ± `juvenile_m_f_weight_ref$sd[2]` and `r juvenile_m_f_weight_ref$mean[1]`±`juvenile_m_f_weight_ref$sd[2]` g, respectively; mean ± 1 standard deviation). While the absolute difference in mean weight is `r round( juvenile_m_f_weight_ref$mean[2]-juvenile_m_f_weight_ref$mean[1], 2)`g ( a 10 % difference), the difference in means is significant (Welch's two-sample t-test: t(`r round(m_f_weight_t$parameter,2)`) = `r round(m_f_weight_t$statistic,2)`, p < 0.001), and the effect size is small (Cohen's *d* = `r round(m_f_weight_cohen$estimate,2)`) 
 
 ## Section 4: Relationship between juvenile weight & hind foot length
 
-```{r}
+```{r fig.align='center'}
 # Wrangle the data
 
 juvenile_hfoot <- bonanza_hares_data %>% 
@@ -254,31 +275,39 @@ ggplot(data = juvenile_hfoot, aes(x = hindft, y = weight))+
   geom_smooth(method = "lm")+
   labs(x = "Hindfoot length (mm)",
        y = "Weight (g)",
-       title = "Juvenile hare weight and hindfoot length (ZAUNER)",
-       caption = "Figure 3: Juvenile hare weight (g) and hindfoot length (mm) comparison with regression line")+
+       title = "Juvenile hare weight and hindfoot length (ZAUNER)")+
   theme(plot.title = element_text(hjust = 0.5, face = "bold"),
-        plot.caption = element_text(hjust = 0.5, face = "bold"))
+        axis.title = element_text(face = "bold"))
 ```
+
 ```{r}
 # Linear model stored as juvenile_lm 
 juvenile_lm <- lm(weight ~ hindft, data = juvenile_hfoot)
 
 # Return complere overview
 
-summary(juvenile_lm)
+#summary(juvenile_lm) 
 
 # Use broom::tidy() function to see the model outputs in a nice format
 
 juvenile_lm_tidy <- broom::tidy(juvenile_lm)
 
-juvenile_lm_glace <- broom::glance(juvenile_lm)
+juvenile_lm_glance <- broom::glance(juvenile_lm)
 
-# Find Pearson's r value which indicated the strength of the correlation between hindfoot length and weight. 
+# Find Pearson's r value which indicated the strength of the correlation between hind foot length and weight. 
 
 juvenile_cor <- cor.test(juvenile_hfoot$weight, juvenile_hfoot$hindft)
 ```
 
+***Figure 3:*** Relationship between juvenile hare weight (g) and hind food length (mm). Points indicate individual hare measurements. Linear model summary: $\beta$~1~ = `r round(juvenile_lm_tidy$estimate[2],2)` g/mm, p < 0.001,  R^2^ = `r round(juvenile_lm_glance$r.squared,2)`, Pearson's *r* = `r round(juvenile_cor$estimate,2)`. Based on the R^2^ value on 30% of variance in hare weights can be explained by hind foot length and Pearson's *r* value describes medium positive relationship between the two variables. Data: Kielland et al. (2017).
+
 # Summary 
+
+Exploratory data analysis reveals the following initial findings:
+
+- Annual trap counts peaked in the first year of the study and were consistently lower in subsequent years.
+- There were significant differences in sample sizes between sites when comparing weights by site and sex, which may have influenced the visible trends of males weighing more then females.
+- 
 
 # Citations 
 
