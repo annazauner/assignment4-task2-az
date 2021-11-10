@@ -34,7 +34,7 @@ bonanza_hares_data <- read_csv(here("data","bonanza_hares.csv")) %>%
 
 # Data and anyalses
 
-The data on snowshoe hares was collected by capture-recapture by Dr. Knut Kielland and colleagues at the Bonanza Creek Experimental Forest in Fairbanks, Alaska (Kielland et al. 2017). The data contain 3,197 observations of snowshoe hares, collected from 1999-2012 over three sites (Black Spruce, Mature and Riparian). Following exploratory visualization, juvenile weights (grams) and hind foot lengths (millimeters) are compared by two-sample t-test using a significance level ($\alpha$) of 0.05 and differences between groups are described by Cohen’s *d* effect size. The relationship between weight and hind foot length is explored by simple linear regression (All analyses are in R version 4.0.2 using RStudio version 1.4.1717)
+The data on snowshoe hares was collected by capture-recapture by Dr. Knut Kielland and colleagues at the Bonanza Creek Experimental Forest in Fairbanks, Alaska (Kielland et al. 2017). The data contain 3,197 observations of snowshoe hares, collected from 1999-2012 over three sites (Black Spruce, Mature and Riparian). Variables of consideration are hare age, sex, trapping date, trapping site, weight and hindfoot length. Exploratory visualizations and decriptive statistics are found for these variables. Juvenile weights (grams) and hind foot lengths (millimeters) are compared by two-sample t-test using a significance level ($\alpha$) of 0.05 and differences between groups are described by Cohen’s *d* effect size. The relationship between weight and hind foot length is explored by a linear model (All analyses are in R version 4.0.2 using RStudio version 1.4.1717).
  
 # Juvenile hare initial investigation 
 
@@ -59,8 +59,11 @@ ggplot(data = annual_juvenile_trap_counts, aes(x = year, y = trap_counts))+
        title = "Annual juvenile hare trap counts (1999-2012) (ZAUNER)")+
   theme_classic()+
   theme(plot.caption = element_text(hjust = 0.5, size = 8, face = "bold"),
-        plot.title = element_text(hjust = 0.5, face = "bold"))+
-  scale_x_continuous(breaks = c(1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012))
+        plot.title = element_text(hjust = 0.5, face = "bold"),
+        panel.background = element_rect(fill = "lightblue"))+
+  scale_y_continuous(limits = c(0, 130),
+                     breaks = c(0, 25, 50, 75,  100, 125))+
+  scale_x_continuous(breaks = 1999:2012)
 
 
 ```
@@ -118,7 +121,8 @@ ggplot(data = juvenile_weights_sex_site, aes(x = sex, y = weight)) +
         axis.title = element_text(face = "bold"),
         panel.border = element_rect(color = "black",
                                     fill = NA,
-                                    size = 0.5))+
+                                    size = 0.5),
+        panel.background = element_rect(fill = "azure3"))+
   facet_wrap(~grid_full)
 ```
 **Figure 2:** Juvenile hare weight observations (g) by sex (male, female and unknown) and site (Black Spruce, Mature and Riparian). Gold (female), teal (male) and coral (unknown) points indicate observations for weight (grams) of a juvenile hare. Black point indicates the mean value for each sex. Data: Kielland et al. (2017).
@@ -136,6 +140,7 @@ juvenile_weights_sex_site_ref <- juvenile_weights_sex_site %>%
 
 ```
 
+**Table 1:** Descriptive statistics (sample size, median, mean, minimum, maximum and standard deviation) for male, female and unknown juvenile hare weights (g). Data: Kielland et al. (2017)"
 ```{r}
 # Summary statistics
 
@@ -143,21 +148,22 @@ juvenile_weights_sex_site_summary <- juvenile_weights_sex_site %>%
   group_by(grid_full, sex) %>% 
   summarize(sample_size = n(),
             meadian = median(weight, na.rm = TRUE),
-            mean = mean(weight, na.rm = TRUE, digits = 1),
+            mean = mean(weight, na.rm = TRUE),
             min = min(weight, na.rm = TRUE),
             max = max(weight, na.rm = TRUE),
             sd = sd(weight, na.rm = TRUE)) %>% 
-  kbl(caption = "Table 1: Descriptive statistics (sample size, median, mean, minimum, maximum and standard deviation) for male, female and unknown juvenile hare weights (g). Data: Kielland et al. (2017)",
-      col.names = c("Site",
+  kbl(col.names = c("Site",
                     "Sex",
                     "Sample size",
                     "Median (g)",
                     "Mean (g)",
                     "Min (g)",
                     "Max (g)",
-                    "Standard deviation (g)")) %>% 
+                    "Standard deviation (g)"),
+      digits = 2) %>% 
   kable_minimal(html_font = "Georgia", font_size = 12, full_width = FALSE) %>% 
-  kable_material(c("striped", "hover", "condensed"))
+  kable_material(c("striped", "hover", "condensed")) %>% 
+  kable_styling(latex_options="scale_down") 
   
 juvenile_weights_sex_site_summary
 
@@ -165,7 +171,7 @@ juvenile_weights_sex_site_summary
 
 ### Juvenile hare weights and descriptive statistics
 
-There is a visible difference in sample sizes of juvenile hares between sites. The Riparian site has the largest sample size of weights for male (`r juvenile_weights_sex_site_ref$sample_size[8]`), female (`r juvenile_weights_sex_site_ref$sample_size[7]`) and unknown (`r juvenile_weights_sex_site_ref$sample_size[9]`) juvenile hares, and the Black Spruce site has the fewest counts of weights for males (`r juvenile_weights_sex_site_ref$sample_size[2]`), females (`r juvenile_weights_sex_site_ref$sample_size[1]`) and unknown `r juvenile_weights_sex_site_ref$sample_size[3]`. The central tendency (mean) of female weights is below male weights at each site although there is a large spread (standard deviation), for Riparian females (`r juvenile_weights_sex_site_ref$mean[7]` ± `r juvenile_weights_sex_site_ref$sd[7]`; mean ± 1 standard deviation) compared to males (`r juvenile_weights_sex_site_ref$mean[8]`± `r juvenile_weights_sex_site_ref$sd[8]`). The biggest take away is that the large differences in sample size (n) and large standard deviations which impact the visible trends.
+There is a visible difference in sample sizes of juvenile hares between sites. The Riparian site has the largest sample size of weights for male (`r juvenile_weights_sex_site_ref$sample_size[8]`), female (`r juvenile_weights_sex_site_ref$sample_size[7]`) and unknown (`r juvenile_weights_sex_site_ref$sample_size[9]`) juvenile hares, and the Black Spruce site has the fewest counts of weights for males (`r juvenile_weights_sex_site_ref$sample_size[2]`), females (`r juvenile_weights_sex_site_ref$sample_size[1]`) and unknown `r juvenile_weights_sex_site_ref$sample_size[3]`. The central tendency (mean) of female weights is below male weights at each site although there is a large spread (standard deviation), for Riparian females (`r round(juvenile_weights_sex_site_ref$mean[7],2)` ± `r round(juvenile_weights_sex_site_ref$sd[7],2)`; mean ± 1 standard deviation) compared to males (`r round(juvenile_weights_sex_site_ref$mean[8],2)`± `r round(juvenile_weights_sex_site_ref$sd[8],2)`). The biggest take away is that the large differences in sample size (n) and large standard deviations which impact the visible trends.
 
 
 ## Section 3: Juvenile weight comparison (male & female snowshoe hares)
@@ -257,7 +263,7 @@ m_f_weight_cohen <- cohen.d(male_sample, female_sample)
 
 ### Table 2 takeaways
 
-On average male juvenile hares weigh more than females (`r juvenile_m_f_weight_ref$mean[2]` ± `juvenile_m_f_weight_ref$sd[2]` and `r juvenile_m_f_weight_ref$mean[1]`±`juvenile_m_f_weight_ref$sd[2]` g, respectively; mean ± 1 standard deviation). While the absolute difference in mean weight is `r round( juvenile_m_f_weight_ref$mean[2]-juvenile_m_f_weight_ref$mean[1], 2)`g ( a 10 % difference), the difference in means is significant (Welch's two-sample t-test: t(`r round(m_f_weight_t$parameter,2)`) = `r round(m_f_weight_t$statistic,2)`, p < 0.001), and the effect size is small (Cohen's *d* = `r round(m_f_weight_cohen$estimate,2)`) 
+On average male juvenile hares weigh more than females (`r round(juvenile_m_f_weight_ref$mean[2],2)` ± `r round(juvenile_m_f_weight_ref$sd[2],2)` and `r round(juvenile_m_f_weight_ref$mean[1],2)`±`r round(juvenile_m_f_weight_ref$sd[2],2)` g, respectively; mean ± 1 standard deviation). While the absolute difference in mean weight is `r round( juvenile_m_f_weight_ref$mean[2]-juvenile_m_f_weight_ref$mean[1], 2)`g ( a `r round((juvenile_m_f_weight_ref$mean[2] -juvenile_m_f_weight_ref$mean[1])/((juvenile_m_f_weight_ref$mean[2] + juvenile_m_f_weight_ref$mean[1])/2)*100, 2)` % difference), the difference in means is significant (Welch's two-sample t-test: t(`r round(m_f_weight_t$parameter,2)`) = `r round(m_f_weight_t$statistic,2)`, p < 0.001), and the effect size is small (Cohen's *d* = `r round(m_f_weight_cohen$estimate,2)`). This indicated that further investigation would need to be done to identify a significant difference in the mean weights between these two sample means. 
 
 ## Section 4: Relationship between juvenile weight & hind foot length
 
@@ -271,13 +277,15 @@ juvenile_hfoot <- bonanza_hares_data %>%
 # Data visualization
 
 ggplot(data = juvenile_hfoot, aes(x = hindft, y = weight))+
-  geom_jitter()+
+  geom_jitter(size = 2, color ="gray12")+
   geom_smooth(method = "lm")+
   labs(x = "Hindfoot length (mm)",
        y = "Weight (g)",
        title = "Juvenile hare weight and hindfoot length (ZAUNER)")+
+  theme_minimal()+
   theme(plot.title = element_text(hjust = 0.5, face = "bold"),
-        axis.title = element_text(face = "bold"))
+        axis.title = element_text(face = "bold"),
+        panel.background = element_rect(fill = "azure2"))
 ```
 
 ```{r}
@@ -299,16 +307,17 @@ juvenile_lm_glance <- broom::glance(juvenile_lm)
 juvenile_cor <- cor.test(juvenile_hfoot$weight, juvenile_hfoot$hindft)
 ```
 
-***Figure 3:*** Relationship between juvenile hare weight (g) and hind food length (mm). Points indicate individual hare measurements. Linear model summary: $\beta$~1~ = `r round(juvenile_lm_tidy$estimate[2],2)` g/mm, p < 0.001,  R^2^ = `r round(juvenile_lm_glance$r.squared,2)`, Pearson's *r* = `r round(juvenile_cor$estimate,2)`. Based on the R^2^ value on 30% of variance in hare weights can be explained by hind foot length and Pearson's *r* value describes medium positive relationship between the two variables. Data: Kielland et al. (2017).
+**Figure 3:** Relationship between juvenile hare weight (g) and hind food length (mm). Points indicate individual hare measurements. Linear model summary: $\beta$~1~ = `r round(juvenile_lm_tidy$estimate[2],2)` g/mm, p < 0.001,  R^2^ = `r round(juvenile_lm_glance$r.squared,2)`, Pearson's *r* = `r round(juvenile_cor$estimate,2)`. Based on the R^2^ value on 30% of variance in hare weights can be explained by hind foot length and Pearson's *r* value describes medium positive relationship between the two variables. Additionally, a linear regression assumes homoskedasticity of data, and the plot above lends concern to this assumption as the data appears heteroskedastic. Data: Kielland et al. (2017).
 
 # Summary 
 
 Exploratory data analysis reveals the following initial findings:
 
-- The inconsistencies in sample sizes between years and sites make it difficult to draw definitive conclusions about the data.
+* The differences in sample sizes between years and sites make it difficult to draw definitive conclusions about the data.
 
-- Given a small to moderate effect size and p value < 0.01, we can consider rejecting the null hypothesis that the means of 
-- 
+* Given a small to moderate effect size and p value < 0.01, we cannot reject the null hypothesis: that male and female sample populations are from populations with the same mean weight.
+
+* The lack of homoskedasticity in the comparison of hare weight and hind foot length suggest that the regression model may need to include additional predictor variables to explain the performance of the dependent variable.
 
 # Citations 
 
